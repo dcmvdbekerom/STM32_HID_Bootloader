@@ -25,7 +25,7 @@
 *
 */
 
-#include <stm32f10x.h>
+#include <stm32f1xx.h> //STM32F103C8T6
 #include <stdbool.h>
 #include "usb.h"
 #include "config.h"
