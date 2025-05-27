@@ -220,7 +220,7 @@ int main(void)
              data that are less
              than sector size
              (16384) */
-            //write_flash_sector(current_Page);
+            write_flash_sector(current_Page);
           }
           HAL_Delay(100);
           HAL_NVIC_SystemReset();
@@ -249,7 +249,7 @@ int main(void)
         currentPageOffset += HID_RX_SIZE;
 
         if (currentPageOffset == SECTOR_SIZE) {
-          //write_flash_sector(current_Page);
+          write_flash_sector(current_Page);
           current_Page++;
           currentPageOffset = 0;
           CMD_DATA_RECEIVED[7] = 0x02;

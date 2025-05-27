@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
   uint8_t hid_tx_buf[HID_TX_SIZE];
   uint8_t hid_rx_buf[HID_RX_SIZE];
   uint8_t CMD_RESET_PAGES[8] = {'B','T','L','D','C','M','D', 0x00};
-  // uint8_t CMD_REBOOT_MCU[8] = {'B','T','L','D','C','M','D', 0x01};
-  uint8_t CMD_BLINK_N[8] = {'B','T','L','D','C','M','D', 0x03};
+  uint8_t CMD_REBOOT_MCU[8] = {'B','T','L','D','C','M','D', 0x01};
+  //uint8_t CMD_BLINK_N[8] = {'B','T','L','D','C','M','D', 0x03};
   hid_device *handle = NULL;
   size_t read_bytes;
   FILE *firmware_file = NULL;
@@ -197,16 +197,16 @@ int main(int argc, char *argv[]) {
 
   printf("\n> Done!\n");
   
-  printf("Press key to blink LED: ");
-  int num;
-  scanf("%d", &num);
-  printf("\nBlinking %d times \n", num);
+  // printf("Press key to blink LED: ");
+  // int num;
+  // scanf("%d", &num);
+  // printf("\nBlinking %d times \n", num);
   
-  // Send CMD_BLINK_N command
+  // Send reboot MCU command
   memset(hid_tx_buf, 0, sizeof(hid_tx_buf));
-  memcpy(&hid_tx_buf[1], CMD_BLINK_N, sizeof(CMD_BLINK_N));
-  hid_tx_buf[9] = (uint8_t)num;
-  printf("> Sending <blink N> command...\n");
+  memcpy(&hid_tx_buf[1], CMD_REBOOT_MCU, sizeof(CMD_REBOOT_MCU));
+  //hid_tx_buf[9] = (uint8_t)num;
+  printf("> Sending <reboot mcu> command...\n");
 
   // Flash is unavailable when writing to it, so USB interrupt may fail here
   if(!usb_write(handle, hid_tx_buf, HID_TX_SIZE)) {

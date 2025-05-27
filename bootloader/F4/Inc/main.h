@@ -97,7 +97,7 @@
 
 #define BOOT_1_PIN      GPIO_PIN_13 //DIYMROE STM32F407VGT board (Button PD15, LED PE0)
 #define BOOT_1_PORT     GPIOC
-#define BOOT_1_ENABLED  GPIO_PIN_RESET
+#define BOOT_1_ENABLED  GPIO_PIN_SET
 #define LED_1_PIN       GPIO_PIN_2
 #define LED_1_PORT      GPIOB
        
