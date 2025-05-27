@@ -73,13 +73,13 @@
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
-uint8_t USB_RX_Buffer[HID_RX_SIZE];
+volatile uint8_t USB_RX_Buffer[HID_RX_SIZE];
 uint8_t USB_TX_Buffer[8]; //USB data -> PC
 static uint8_t CMD_SIGNATURE[7] = {'B','T','L','D','C','M','D'};
 
 /* Command: <Send next data pack> */
 static uint8_t CMD_DATA_RECEIVED[8] = {'B','T','L','D','C','M','D',2};
-uint8_t new_data_is_received = 0;
+volatile uint8_t new_data_is_received = 0;
 static uint8_t pageData[SECTOR_SIZE];
 typedef void (*funct_ptr)(void);
 
@@ -192,7 +192,7 @@ int main(void)
   while (1) {
     if (new_data_is_received == 1) {
       new_data_is_received = 0;
-      if (memcmp(USB_RX_Buffer, CMD_SIGNATURE, sizeof (CMD_SIGNATURE)) == 0) {
+      if (memcmp((const void *)USB_RX_Buffer, CMD_SIGNATURE, sizeof (CMD_SIGNATURE)) == 0) {
         switch(USB_RX_Buffer[7]){
           case 0x00:
 
@@ -200,14 +200,15 @@ int main(void)
           current_Page = 16;
           currentPageOffset = 0;
           erase_page = 1;
+          //If I uncomment this, HID reports sent by device are not received by host anymore
             // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
-            // HAL_Delay(250);
+            // for (volatile int i=0; i<1000000; i++) __asm("NOP");
             // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
-            // HAL_Delay(250);
+            // for (volatile int i=0; i<1000000; i++) __asm("NOP");
             // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
-            // HAL_Delay(250);
+            // for (volatile int i=0; i<1000000; i++) __asm("NOP");
             // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
-            // HAL_Delay(250);
+            // for (volatile int i=0; i<1000000; i++) __asm("NOP");
           break;
 
         case 0x01:
@@ -244,7 +245,7 @@ int main(void)
         }
       } else {
         
-        memcpy(pageData + currentPageOffset, USB_RX_Buffer, HID_RX_SIZE);
+        memcpy(pageData + currentPageOffset, (const void *)USB_RX_Buffer, HID_RX_SIZE);
         currentPageOffset += HID_RX_SIZE;
 
         if (currentPageOffset == SECTOR_SIZE) {
