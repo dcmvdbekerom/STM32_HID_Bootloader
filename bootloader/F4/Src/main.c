@@ -166,6 +166,19 @@ int main(void)
   /* Initialize all configured peripherals */
   
   MX_USB_DEVICE_Init();
+  
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+    HAL_Delay(250);
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+    HAL_Delay(250);
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+    HAL_Delay(250);
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+    HAL_Delay(250);
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+    HAL_Delay(250);
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+    HAL_Delay(250);
 
   /* USER CODE BEGIN 2 */
                                                
@@ -187,7 +200,14 @@ int main(void)
           current_Page = 16;
           currentPageOffset = 0;
           erase_page = 1;
-          // HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_0);	
+            // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+            // HAL_Delay(250);
+            // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+            // HAL_Delay(250);
+            // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+            // HAL_Delay(250);
+            // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+            // HAL_Delay(250);
           break;
 
         case 0x01:
@@ -199,22 +219,46 @@ int main(void)
              data that are less
              than sector size
              (16384) */
-            write_flash_sector(current_Page);
+            //write_flash_sector(current_Page);
           }
           HAL_Delay(100);
           HAL_NVIC_SystemReset();
           break;
+          
+        // case 0x03:
+
+          // for (uint8_t i=0; i<USB_RX_Buffer[6]; i++){
+              
+                // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+                // HAL_Delay(250);
+                // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+                // HAL_Delay(250);
+
+          // }
+
+
+          // break;  
+          
         }
       } else {
+        
         memcpy(pageData + currentPageOffset, USB_RX_Buffer, HID_RX_SIZE);
         currentPageOffset += HID_RX_SIZE;
+
         if (currentPageOffset == SECTOR_SIZE) {
-          write_flash_sector(current_Page);
+          //write_flash_sector(current_Page);
           current_Page++;
           currentPageOffset = 0;
           CMD_DATA_RECEIVED[7] = 0x02;
           USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, CMD_DATA_RECEIVED, 8);
         }
+        // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+        // HAL_Delay(100);
+        // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+        // HAL_Delay(100);
+
+        
+        
       }
     }
   }

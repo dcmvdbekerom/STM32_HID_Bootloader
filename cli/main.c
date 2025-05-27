@@ -64,7 +64,8 @@ int main(int argc, char *argv[]) {
   uint8_t hid_tx_buf[HID_TX_SIZE];
   uint8_t hid_rx_buf[HID_RX_SIZE];
   uint8_t CMD_RESET_PAGES[8] = {'B','T','L','D','C','M','D', 0x00};
-  uint8_t CMD_REBOOT_MCU[8] = {'B','T','L','D','C','M','D', 0x01};
+  // uint8_t CMD_REBOOT_MCU[8] = {'B','T','L','D','C','M','D', 0x01};
+  uint8_t CMD_BLINK_N[8] = {'B','T','L','D','C','M',3, 0x03};
   hid_device *handle = NULL;
   size_t read_bytes;
   FILE *firmware_file = NULL;
@@ -72,7 +73,7 @@ int main(int argc, char *argv[]) {
   uint32_t n_bytes = 0;
   int i;
   setbuf(stdout, NULL);
-  uint8_t _timer = 0;
+  // uint8_t _timer = 0;
   
   printf("\n+-----------------------------------------------------------------------+\n");
   printf  ("|         HID-Flash v2.2.1 - STM32 HID Bootloader Flash Tool            |\n");
@@ -81,12 +82,13 @@ int main(int argc, char *argv[]) {
   printf  ("|   Customized for STM32duino ecosystem   https://www.stm32duino.com    |\n");
   printf  ("+-----------------------------------------------------------------------+\n\n");
   
-  if(argc < 3) {
-    printf("Usage: hid-flash <bin_firmware_file> <comport> <delay (optional)>\n");
+  if(argc < 2) {
+    printf("Usage: hid-flash <bin_firmware_file> <delay (optional)>\n");
     return 1;
-  }else if(argc == 4){
-    _timer = atol(argv[3]);
   }
+  //else if(argc == 3){
+    // _timer = atol(argv[2]);
+  // }
   
   firmware_file = fopen(argv[1], "rb");
   if(!firmware_file) {
@@ -94,11 +96,11 @@ int main(int argc, char *argv[]) {
     return error;
   }
   
-  if(serial_init(argv[2], _timer) == 0){ //Setting up Serial port
-    RS232_CloseComport();
-  }else{
-    printf("> Unable to open the [%s]\n",argv[2]);
-  }
+  // if(serial_init(argv[2], _timer) == 0){ //Setting up Serial port
+    // RS232_CloseComport();
+  // }else{
+    // printf("> Unable to open the [%s]\n",argv[2]);
+  // }
   
   hid_init();
   
@@ -183,7 +185,9 @@ int main(int argc, char *argv[]) {
     printf(" %d Bytes\n", n_bytes);
 
     do{
+      printf("-- HID read... ");
       hid_read(handle, hid_rx_buf, 9);
+      printf("Done!\n");
       usleep(500);
     }while(hid_rx_buf[7] != 0x02);
     
@@ -193,9 +197,9 @@ int main(int argc, char *argv[]) {
 
   printf("\n> Done!\n");
   
-  // Send CMD_REBOOT_MCU command to reboot the microcontroller...
+  // Send CMD_BLINK_N command
   memset(hid_tx_buf, 0, sizeof(hid_tx_buf));
-  memcpy(&hid_tx_buf[1], CMD_REBOOT_MCU, sizeof(CMD_REBOOT_MCU));
+  memcpy(&hid_tx_buf[1], CMD_BLINK_N, sizeof(CMD_BLINK_N));
 
   printf("> Sending <reboot mcu> command...\n");
 
@@ -205,6 +209,8 @@ int main(int argc, char *argv[]) {
   }
   
 exit:
+  printf("Closing HID device... ");
+
   if(handle) {
     hid_close(handle);
   }
@@ -215,20 +221,20 @@ exit:
     fclose(firmware_file);
   }
   
-  printf("> Searching for [%s] ...\n",argv[2]);
+  // printf("> Searching for [%s] ...\n",argv[2]);
 
-  for(int i=0;i<5;i++){
-    if(RS232_OpenComport(argv[2]) == 0){
-      printf("> [%s] is found !\n",argv[2] );
-      break;
-    }
-    sleep(1);
-  }
+  // for(int i=0;i<5;i++){
+    // if(RS232_OpenComport(argv[2]) == 0){
+      // printf("> [%s] is found !\n",argv[2] );
+      // break;
+    // }
+    // sleep(1);
+  // }
   
-  if(i==5){
-    printf("> Comport is not found\n");
-  }
-  printf("> Finish\n");
+  // if(i==5){
+    // printf("> Comport is not found\n");
+  // }
+  printf("- All Done!\n");
   
   return error;
 }
