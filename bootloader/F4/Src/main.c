@@ -225,19 +225,21 @@ int main(void)
           HAL_NVIC_SystemReset();
           break;
           
-        // case 0x03:
+        case 0x03:
+          uint8_t imax = 3;
+          if (imax>0) imax = USB_RX_Buffer[8];
 
-          // for (uint8_t i=0; i<USB_RX_Buffer[6]; i++){
+          for (uint8_t i=0; i<imax; i++){
               
-                // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
-                // HAL_Delay(250);
-                // HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
-                // HAL_Delay(250);
+                HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+                HAL_Delay(150);
+                HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+                HAL_Delay(150);
 
-          // }
+          }
 
 
-          // break;  
+          break;  
           
         }
       } else {
