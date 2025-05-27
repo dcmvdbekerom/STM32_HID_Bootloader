@@ -31,9 +31,9 @@ TARGET = hid_bootloader
 # building variables
 ######################################
 # debug build?
-DEBUG = 1
+DEBUG = 0
 # optimization
-OPT = -Og
+OPT = -Os
 
 
 #######################################
@@ -75,7 +75,8 @@ Src/system_stm32f4xx.c \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_core.c \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ctlreq.c \
 Middlewares/ST/STM32_USB_Device_Library/Core/Src/usbd_ioreq.c \
-Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Src/usbd_customhid.c  
+Middlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Src/usbd_customhid.c \
+usart-stdio/stm32-stdio.c
 
 # ASM sources
 ASM_SOURCES =  \
@@ -139,7 +140,8 @@ C_INCLUDES =  \
 -IMiddlewares/ST/STM32_USB_Device_Library/Core/Inc \
 -IMiddlewares/ST/STM32_USB_Device_Library/Class/CustomHID/Inc \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
--IDrivers/CMSIS/Include
+-IDrivers/CMSIS/Include \
+-Iusart-stdio
 
 
 # compile gcc flags
@@ -160,7 +162,7 @@ CFLAGS += -MMD -MP -MF"$(@:%.o=%.d)"
 # LDFLAGS
 #######################################
 # link script
-LDSCRIPT = stm32f446_2.ld
+LDSCRIPT = stm32f446_cmsis.ld
 
 # libraries
 LIBS = -lc -lm -lnosys 

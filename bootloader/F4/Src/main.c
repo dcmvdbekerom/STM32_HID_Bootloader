@@ -64,6 +64,14 @@
 #include "usb_device.h"
 #include "stm32f4xx_ll_rtc.h"
 #include "stm32f4xx_ll_pwr.h"
+
+
+#include <stdio.h>
+#include <stdlib.h> //atoi()
+#include "stm32-stdio.h"
+
+
+
 /* USER CODE BEGIN Includes */
 
 /* USER CODE END Includes	*/
@@ -130,8 +138,60 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
   MX_GPIO_Init();
-   
+  
+  
+    // Enable GPIOA clock
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+
+    // Set PA2 and PA3 to Alternate Function mode (MODER = 10)
+    GPIOA->MODER &= ~((3U << (2 * 2)) | (3U << (3 * 2))); // Clear bits for PA2, PA3
+    GPIOA->MODER |=  ((2U << (2 * 2)) | (2U << (3 * 2))); // Set to Alternate Function
+
+    // Set to no pull-up, no pull-down (PUPDR = 00)
+    GPIOA->PUPDR &= ~((3U << (2 * 2)) | (3U << (3 * 2))); // No pull
+
+    // Set output type to push-pull (default, optional)
+    GPIOA->OTYPER &= ~((1U << 2) | (1U << 3));
+
+    // Set speed (optional, but HIGH is often used for USART)
+    GPIOA->OSPEEDR |= ((2U << (2 * 2)) | (2U << (3 * 2))); // Medium/High speed
+
+    // Set Alternate Function 7 (USART2) on PA2 and PA3
+    GPIOA->AFR[0] &= ~((0xF << (4 * 2)) | (0xF << (4 * 3)));      // Clear bits
+    GPIOA->AFR[0] |=  ((7U << (4 * 2)) | (7U << (4 * 3)));         // AF7 for USART2
+
+      // Enable USART2 clock (assuming APB1 for USART2)
+    RCC->APB1ENR |= RCC_APB1ENR_USART2EN;
+
+    // Configure GPIO pins for USART2 TX/RX beforehand (not shown here)
+
+    // Disable USART before configuration
+    USART2->CR1 &= ~USART_CR1_UE;
+
+    // Set baud rate (assumes oversampling by 16 and clock known)
+    USART2->BRR = 18000000 / 115200; // Adjust if PCLK1 != SystemCoreClock
+
+    // 8 data bits, no parity
+    USART2->CR1 &= ~(USART_CR1_M | USART_CR1_PCE); // M=0 for 8 data bits, PCE=0 for no parity
+
+    // 1 stop bit
+    USART2->CR2 &= ~USART_CR2_STOP; // STOP[1:0] = 00 -> 1 stop bit
+
+    // No hardware flow control
+    USART2->CR3 &= ~(USART_CR3_RTSE | USART_CR3_CTSE);
+
+    // Enable transmitter and receiver
+    USART2->CR1 |= USART_CR1_TE | USART_CR1_RE;
+
+    // Enable USART
+    USART2->CR1 |= USART_CR1_UE;
+  
+  
+    printf("Booting... ");
+  
+  
   HAL_Delay(100);
+
   
   magic_val = LL_RTC_BAK_GetRegister(RTC, HID_MAGIC_NUMBER_BKP_INDEX);
   
@@ -142,11 +202,43 @@ int main(void)
     pFunction Jump_To_Application;
     uint32_t JumpAddress;
     
+    printf("> Jumping to user code...\n");
+    
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+    HAL_Delay(50);
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+    HAL_Delay(50);
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+    HAL_Delay(50);
+    HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+    HAL_Delay(50);
+    
     JumpAddress = *(__IO uint32_t*) (FLASH_BASE + USER_CODE_OFFSET + 4);
     Jump_To_Application = (pFunction) JumpAddress;
     __set_MSP(*(uint32_t *) (FLASH_BASE + USER_CODE_OFFSET));
+    printf("JUMP!\n");
+
     Jump_To_Application(); 
   }
+  printf("> Starting bootloader! \n");
+
+  HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+  HAL_Delay(25);
+  HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+  HAL_Delay(25);
+  HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+  HAL_Delay(25);
+  HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+  HAL_Delay(25);
+  HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+  HAL_Delay(25);
+  HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+  HAL_Delay(25);
+  HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 1);	
+  HAL_Delay(25);
+  HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, 0);	
+  HAL_Delay(25);
+
   
   /* Reset the magic number backup memory */
   
@@ -164,8 +256,12 @@ int main(void)
   /* USER CODE END SysInit */
   
   /* Initialize all configured peripherals */
-  
+  printf("Init USB device... ");
+
   MX_USB_DEVICE_Init();
+
+  printf("Done!\n");
+
 
   /* USER CODE BEGIN 2 */
                                                
@@ -178,10 +274,16 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1) {
     if (new_data_is_received == 1) {
+      printf("New data received... \n");
+
       new_data_is_received = 0;
       if (memcmp(USB_RX_Buffer, CMD_SIGNATURE, sizeof (CMD_SIGNATURE)) == 0) {
+        printf("COMMAND: ");
+        //printf(USB_RX_Buffer);
+
         switch(USB_RX_Buffer[7]){
           case 0x00:
+            printf("\n <Reset pages> \n");
 
           /*------------ Reset pages */
           current_Page = 16;
@@ -191,6 +293,7 @@ int main(void)
           break;
 
         case 0x01:
+          printf("\n <Reset MCU> \n");
 
           /*------------- Reset MCU */
           if (currentPageOffset > 0) {
@@ -206,14 +309,20 @@ int main(void)
           break;
         }
       } else {
+        printf("DATA: \n");
         memcpy(pageData + currentPageOffset, USB_RX_Buffer, HID_RX_SIZE);
         currentPageOffset += HID_RX_SIZE;
+        printf("New page offset: %d \n", currentPageOffset);
         if (currentPageOffset == SECTOR_SIZE) {
+          printf("Received full page, write to flash\n");
           write_flash_sector(current_Page);
           current_Page++;
           currentPageOffset = 0;
+        
           CMD_DATA_RECEIVED[7] = 0x02;
+          printf("Send report... \n");        
           USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, CMD_DATA_RECEIVED, 8);
+          printf("Report sent...! \n");
         }
       }
     }
@@ -304,11 +413,7 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
- 
-                               
-                                  
-                                        
-                                    
+               
                                               
 
   /* Configure GPIO pin : PB2 */
@@ -333,13 +438,7 @@ void write_flash_sector(uint32_t currentPage) {
   HAL_GPIO_WritePin(LED_1_PORT, LED_1_PIN, GPIO_PIN_SET);	
   FLASH_EraseInitTypeDef EraseInit;
   HAL_FLASH_Unlock();
-  
-                                                                   
-                                                  
-                                                  
-                                
-                                                
-                                                 
+                               
 
   /* Sector to the erase the flash memory (16, 32, 48 ... kbytes) */
   if ((currentPage == 16) || (currentPage == 32) ||

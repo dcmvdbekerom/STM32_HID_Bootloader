@@ -125,10 +125,12 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
 	0x09, 0x00,      //USAGE (Undefined)                        // 5 B
 	0xA1, 0x01,      //COLLECTION (Application)                 // 7 B
 
+    //0x85, 0x01,   
 	0x75, 0x08,      //  REPORT_SIZE (8)                        // 9 B
 	0x95, CUSTOM_HID_EPOUT_SIZE,      //  REPORT_COUNT (64)
 	0x91, 0x03,			 //  OUTPUT (Cnst, Var, Abs)												   // 14B
 
+    //0x85, 0x02,   
 	0x75, 0x08,      //  REPORT_SIZE (8)                        // 9 B
 	0x95, CUSTOM_HID_EPIN_SIZE,      //  REPORT_COUNT (8)
 	0x81, 0x03,			 //  INPUT (Cnst, Var, Abs)												   // 14B
@@ -193,6 +195,8 @@ USBD_CUSTOM_HID_ItfTypeDef USBD_CustomHID_fops_FS =
 static int8_t CUSTOM_HID_Init_FS(void)
 {
 	/* USER CODE BEGIN 4 */
+        printf("CUSTOM_HID_Init_FS()\n");
+
 	return USBD_OK;
 	/* USER CODE END 4 */
 }
@@ -204,6 +208,7 @@ static int8_t CUSTOM_HID_Init_FS(void)
 static int8_t CUSTOM_HID_DeInit_FS(void)
 {
 	/* USER CODE BEGIN 5 */
+    printf("CUSTOM_HID_DeInit_FS()\n");
 	return USBD_OK;
 	/* USER CODE END 5 */
 }
@@ -216,6 +221,8 @@ static int8_t CUSTOM_HID_DeInit_FS(void)
   */
 static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 {
+    printf("CUSTOM_HID_OutEvent_FS()");
+
 	/* USER CODE BEGIN 6 */
   	USBD_CUSTOM_HID_HandleTypeDef *hhid = (USBD_CUSTOM_HID_HandleTypeDef*) hUsbDeviceFS.pClassData;
 

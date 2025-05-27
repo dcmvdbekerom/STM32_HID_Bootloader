@@ -183,8 +183,11 @@ int main(int argc, char *argv[]) {
     printf(" %d Bytes\n", n_bytes);
 
     do{
-      hid_read(handle, hid_rx_buf, 9);
+      printf("\n> before reading hid..");
+
+      hid_read(handle, hid_rx_buf, 9); //<- gets stuck here
       usleep(500);
+      printf("\n> ...after  hid..");
     }while(hid_rx_buf[7] != 0x02);
     
     memset(page_data, 0, sizeof(page_data));
