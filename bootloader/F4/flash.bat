@@ -1,0 +1,1 @@
+openocd -f interface/stlink.cfg -f target/stm32f4x.cfg -c "program build/hid_bootloader.elf verify reset exit"
